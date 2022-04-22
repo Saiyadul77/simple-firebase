@@ -1,23 +1,76 @@
-import logo from './logo.svg';
 import './App.css';
+import app from './firebase';
+import { FacebookAuthProvider, getAuth, GithubAuthProvider, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
+import { useState } from 'react';
+
+const auth = getAuth(app);
 
 function App() {
+  const [user, setUser] = useState({});
+  const googleProvider = new GoogleAuthProvider();
+  const githubProvider = new GithubAuthProvider();
+  const facebookProvider = new FacebookAuthProvider();
+
+  const handleGoogleSignIn = () => {
+
+    signInWithPopup(auth, googleProvider)
+      .then((result) => {
+        const user = result.user;
+        setUser(user)
+        console.log(user)
+      }).catch((error) => {
+        console.log('error', error)
+      })
+  }
+
+  const handleFacebookSignIn = () => {
+    signInWithPopup(auth, facebookProvider)
+      .then((result) => {
+        const user = result.user;
+        setUser(user)
+      })
+      .catch(error => {
+        console.error(error)
+      })
+  }
+
+  const handleGithubSignIn = () => {
+    signInWithPopup(auth, githubProvider)
+
+      .then((result) => {
+        const user = result.user
+        setUser(user)
+      })
+      .catch((error) => {
+        console.log('error', error)
+      })
+  }
+
+  const handleSignOut = () => {
+    signOut(auth)
+      .then(() => {
+        setUser({ user })
+      })
+      .catch((error) => {
+        setUser({})
+      })
+  }
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      {
+        user.email ?
+          <button onClick={handleSignOut}>Sign Out</button>
+          :
+          <div>
+            <button onClick={handleGoogleSignIn}>Google Sign In</button>
+            <button onClick={handleFacebookSignIn}>Facebook Sign In</button>
+            <button onClick={handleGithubSignIn}>Github Sign In</button>
+          </div>
+      }
+      <h3>Your Name: {user.displayName}</h3>
+      <h3>Your Email: {user.email}</h3>
+      <img src={user.photoURL} alt="" />
     </div>
   );
 }
